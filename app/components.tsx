@@ -1,4 +1,6 @@
-import type { FormEvent } from "react";
+"use client";
+
+import { useEffect, useRef, type FormEvent } from "react";
 import { todayKey } from "@/lib/dates";
 import type { Goal, PlanTask, PlanWithTasks, TaskStatus } from "@/lib/types";
 
@@ -184,12 +186,7 @@ function GoalForm({
 }) {
   return (
     <form className="mb-5 grid gap-3" onSubmit={onSubmit}>
-      <input
-        className="rounded-2xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-violet-400"
-        value={goalTitle}
-        onChange={(event) => onGoalTitleChange(event.target.value)}
-        placeholder="Add a goal"
-      />
+      <AutoGrowGoalInput value={goalTitle} onChange={onGoalTitleChange} />
       <div className="grid grid-cols-[1fr_1.1fr_auto] gap-2">
         <select
           className="rounded-2xl border border-white/10 bg-zinc-950 px-3 py-3 text-sm text-white outline-none focus:border-violet-400"
@@ -217,6 +214,31 @@ function GoalForm({
         </button>
       </div>
     </form>
+  );
+}
+
+function AutoGrowGoalInput({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [value]);
+
+  return (
+    <textarea
+      ref={textareaRef}
+      className="min-h-[46px] resize-none overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm leading-5 text-white outline-none transition placeholder:text-zinc-600 focus:border-violet-400"
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder="Add a goal"
+      rows={1}
+    />
   );
 }
 
@@ -413,4 +435,6 @@ function sortPlanTasks(plan: PlanWithTasks): PlanWithTasks {
     tasks: [...(plan.tasks ?? [])].sort((a, b) => a.priority - b.priority || a.created_at.localeCompare(b.created_at))
   };
 }
+
+
 

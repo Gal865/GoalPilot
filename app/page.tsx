@@ -1,6 +1,6 @@
 "use client";
 
-import type { Session } from "@supabase/supabase-js";
+import type { AuthError, PostgrestError, Session } from "@supabase/supabase-js";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import {
   DashboardGrid,
@@ -61,7 +61,9 @@ export default function Home() {
     ]);
 
     if (goalsResult.error || plansResult.error) {
-      setError("Could not load your dashboard from Supabase.");
+      setError(
+        `Could not load your dashboard: ${formatSupabaseError(goalsResult.error ?? plansResult.error)}`
+      );
     } else {
       setGoals((goalsResult.data ?? []) as Goal[]);
       setPlan((plansResult.data as PlanWithTasks | null) ?? null);
@@ -170,7 +172,7 @@ export default function Home() {
       .single();
 
     if (goalError || !data) {
-      setError("Could not add that goal.");
+      setError(`Could not add that goal: ${formatSupabaseError(goalError)}`);
       return;
     }
 
@@ -223,7 +225,7 @@ export default function Home() {
     const { error: taskError } = await supabase.from("plan_tasks").update({ status }).eq("id", task.id);
 
     if (taskError) {
-      setError("Could not update that task.");
+      setError(`Could not update that task: ${formatSupabaseError(taskError)}`);
     } else {
       setPlan((current) => {
         if (!current) {
@@ -281,4 +283,10 @@ export default function Home() {
   );
 }
 
+function formatSupabaseError(error: AuthError | PostgrestError | null) {
+  if (!error) {
+    return "No details returned.";
+  }
 
+  return error.message;
+}
