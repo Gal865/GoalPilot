@@ -160,7 +160,7 @@ async function generatePlan(context: {
       "X-OpenRouter-Title": "GoalPilot"
     },
     body: JSON.stringify({
-      model: "meta-llama/llama-4-scout:free",
+      model: "google/gemma-4-31b-it:free",
       temperature: 0.45,
       messages: [
         {
