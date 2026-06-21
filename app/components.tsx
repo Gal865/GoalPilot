@@ -29,7 +29,7 @@ export function SignInScreen({
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-8 text-zinc-100">
       <section className="w-full max-w-md rounded-3xl border border-white/10 bg-zinc-900/80 p-6 shadow-soft">
-        <p className="text-sm font-medium text-violet-300">Daily focus</p>
+        <p className="text-sm font-medium text-violet-300">Your Day is Ready</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">GoalPilot</h1>
         <p className="mt-3 text-sm leading-6 text-zinc-400">
           Sign in with your email to save goals, plans, and task history to your account.
@@ -54,7 +54,7 @@ export function SignInScreen({
             type="submit"
             disabled={authLoading}
           >
-            {authLoading ? "Sending link..." : "Email me a sign-in link"}
+            {authLoading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
@@ -89,7 +89,7 @@ function DashboardHeader({ onSignOut }: { onSignOut: () => void }) {
   return (
     <header className="flex flex-col gap-3 rounded-3xl border border-white/10 bg-zinc-900/70 p-5 shadow-soft sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p className="text-sm font-medium text-violet-300">Daily focus</p>
+        <p className="text-sm font-medium text-violet-300">Your Day is Ready</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight text-white sm:text-4xl">GoalPilot</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
           Plan the day from your active goals, refresh when reality changes, and keep completed work in history.
@@ -413,3 +413,4 @@ function sortPlanTasks(plan: PlanWithTasks): PlanWithTasks {
     tasks: [...(plan.tasks ?? [])].sort((a, b) => a.priority - b.priority || a.created_at.localeCompare(b.created_at))
   };
 }
+
