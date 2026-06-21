@@ -13,11 +13,11 @@ import { todayKey } from "@/lib/dates";
 import { createBrowserSupabaseClient } from "@/lib/supabase";
 import type { Goal, PlanTask, PlanWithTasks, TaskStatus } from "@/lib/types";
 
-const supabase = createBrowserSupabaseClient();
 
 type PlanningMode = "generate" | "refresh";
 
 export default function Home() {
+  const supabase = useMemo(() => createBrowserSupabaseClient(), []);
   const [session, setSession] = useState<Session | null>(null);
   const [email, setEmail] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
@@ -33,9 +33,10 @@ export default function Home() {
   const [error, setError] = useState("");
 
   const userId = session?.user.id ?? "";
+  const setupError = supabase ? "" : "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON.";
 
   const loadDashboard = useCallback(async (id: string) => {
-    if (!id) {
+    if (!id || !supabase) {
       return;
     }
 
@@ -67,10 +68,15 @@ export default function Home() {
     }
 
     setLoading(false);
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
     let mounted = true;
+
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
 
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) {
@@ -102,7 +108,7 @@ export default function Home() {
       mounted = false;
       listener.subscription.unsubscribe();
     };
-  }, [loadDashboard]);
+  }, [loadDashboard, supabase]);
 
   const totalMinutes = useMemo(
     () => plan?.tasks.reduce((sum, task) => sum + task.estimated_minutes, 0) ?? 0,
@@ -112,6 +118,11 @@ export default function Home() {
   async function signIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!email.trim()) {
+      return;
+    }
+
+    if (!supabase) {
+      setError(setupError);
       return;
     }
 
@@ -136,12 +147,12 @@ export default function Home() {
   }
 
   async function signOut() {
-    await supabase.auth.signOut();
+    await supabase?.auth.signOut();
   }
 
   async function addGoal(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!goalTitle.trim() || !userId) {
+    if (!goalTitle.trim() || !userId || !supabase) {
       return;
     }
 
@@ -201,6 +212,11 @@ export default function Home() {
   }
 
   async function updateTaskStatus(task: PlanTask, status: TaskStatus) {
+    if (!supabase) {
+      setError(setupError);
+      return;
+    }
+
     setSavingTaskId(task.id);
     setError("");
 
@@ -230,7 +246,7 @@ export default function Home() {
         email={email}
         authLoading={authLoading}
         authMessage={authMessage}
-        error={error}
+        error={error || setupError}
         onEmailChange={setEmail}
         onSubmit={signIn}
       />
@@ -264,3 +280,5 @@ export default function Home() {
     </DashboardShell>
   );
 }
+
+

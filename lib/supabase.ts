@@ -5,20 +5,30 @@ function getSupabaseEnv() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON.");
+    return null;
   }
 
   return { supabaseUrl, supabaseAnonKey };
 }
 
 export function createBrowserSupabaseClient() {
-  const { supabaseUrl, supabaseAnonKey } = getSupabaseEnv();
-  return createClient(supabaseUrl, supabaseAnonKey);
+  const env = getSupabaseEnv();
+
+  if (!env) {
+    return null;
+  }
+
+  return createClient(env.supabaseUrl, env.supabaseAnonKey);
 }
 
 export function createServerSupabaseClient(accessToken?: string) {
-  const { supabaseUrl, supabaseAnonKey } = getSupabaseEnv();
-  return createClient(supabaseUrl, supabaseAnonKey, {
+  const env = getSupabaseEnv();
+
+  if (!env) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON.");
+  }
+
+  return createClient(env.supabaseUrl, env.supabaseAnonKey, {
     global: accessToken
       ? {
           headers: {
@@ -32,4 +42,3 @@ export function createServerSupabaseClient(accessToken?: string) {
     }
   });
 }
-
